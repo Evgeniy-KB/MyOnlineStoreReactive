@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="../css/style.css" rel="stylesheet" type="text/css"/>
+    <title>Товар</title>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+           const decrementButton = document.getElementById('decrement');
+           const incrementButton = document.getElementById('increment');
+           const quantityInput = document.getElementById('quantity');
+
+           decrementButton.addEventListener('click', function () {
+             decreaseQuantity();
+           });
+
+           incrementButton.addEventListener('click', function () {
+             increaseQuantity();
+           });
+
+           function decreaseQuantity() {
+             let currentQuantity = parseInt(quantityInput.value, 10);
+             if (currentQuantity > 1) {
+               quantityInput.value = currentQuantity - 1;
+             }
+           }
+
+           function increaseQuantity() {
+             let currentQuantity = parseInt(quantityInput.value, 10);
+             quantityInput.value = currentQuantity + 1;
+           }
+         });
+
+    </script>
+
+</head>
+<body>
+
+<a href="/orders" style ="margin-left:20px;float:right;">
+    <p><b>Заказы</b></p>
+</a>
+<a href="/cart" style ="margin-left:20px;float:right;">
+    <p><b>Корзина</b></p>
+</a>
+
+<div class="container">
+    <hr>
+    <h1>Описание товара</h1>
+
+    <p>
+        <b th:text="${product.getTitle()}"></b>
+    </p>
+    <p>
+        <img th:src="@{'data:image/png;base64,'+${product.generateBase64Image()}}" width="1000px" height="500px"/>
+    </p>
+    <p>
+        <b th:text="${product.getDescription()}"></b>
+    </p>
+    <p>
+        <b th:text="${product.getPrice()}"></b>
+    </p>
+
+    <button id="decrement">-</button>
+    <button id="increment">+</button>
+
+    <form th:action="@{'/products/'+ ${product.getId()} +'/add-to-cart'}" enctype="multipart/form-data" th:method = "post">
+        <input type="number" id="quantity" name="quantity" th:value=${quantity} min="1" aria-valuemax="10" style="display:inline;width:40px;">
+        <button type="submit">В корзину</button>
+    </form>
+
+    <hr>
+        <a th:href="@{/products}">
+            <b>Все товары</b>
+        </a>
+    </hr>
+</div>
+
+</body>
+</html>

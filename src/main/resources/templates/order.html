@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="../css/style.css" rel="stylesheet" type="text/css"/>
+    <title>Страница заказа</title>
+</head>
+<body>
+
+<a href="/orders" style ="margin-left:20px;float:right;">
+    <p><b>Заказы</b></p>
+</a>
+<a href="/cart" style ="margin-left:20px;float:right;">
+    <p><b>Корзина</b></p>
+</a>
+
+<table>
+    <thead>
+    <tr>
+        <th>Название</th>
+        <th>Картинка</th>
+        <th>Цена</th>
+        <th>Количество</th>
+        <th>Общая цена (руб.)</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="product : ${products}">
+        <td>
+            <a th:href="@{/products/{id}(id=${product.getId()})}" th:text="${product.getTitle()}"></a>
+        </td>
+        <td>
+            <img th:src="@{'data:image/png;base64,'+${product.generateBase64Image()}}" alt="" width="250px" height="120px"/>
+        </td>
+        <td th:text="${product.getPrice()}"></td>
+        <td th:text="${product.getQuantity()}"></td>
+        <td th:text="${product.getTotalPrice()}"></td>
+
+    </tr>
+    </tbody>
+</table>
+
+<p>
+    <b th:text="${'Общая цена: ' + #objects.nullSafe(totalPriceOfOrder, 0)}"></b>
+</p>
+
+<hr>
+    <a th:href="@{/products}">
+        <b>Все товары</b>
+    </a>
+</hr>
+
+</body>
+</html>

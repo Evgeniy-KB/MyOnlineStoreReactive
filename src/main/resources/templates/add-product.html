@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="../css/style.css" rel="stylesheet" type="text/css"/>
+    <title>Добавить пост</title>
+</head>
+<body>
+
+<a href="/orders" style ="margin-left:20px;float:right;">
+    <p><b>Заказы</b></p>
+</a>
+<a href="/cart" style ="margin-left:20px;float:right;">
+    <p><b>Корзина</b></p>
+</a>
+
+<div class="container">
+    <hr>
+    <h1>Добавление товара</h1>
+
+    <form th:action="@{/products/save}" th:object="${product}" enctype="multipart/form-data" method="post">
+        <div>
+            <input type="text" th:field="*{title}" placeholder="Название"/>
+        </div>
+        <div>
+            <label for="pictureFile">Изображение</label>
+            <input type="file" id="pictureFile" name="pictureFile"/>
+            <img th:src="@{'data:image/png;base64,'+${product.generateBase64Image()}}" width="1000px" height="500px"/>
+        </div>
+        <div>
+            <textarea id="description" name="description" th:field="*{description}" placeholder="Описание"></textarea>
+        </div>
+        <div>
+            <input type="number" step="any" th:field="*{price}" placeholder="Цена"/>
+        </div>
+
+        <button type="submit">Сохранить</button>
+    </form>
+
+    <hr>
+        <a th:href="@{/products}">
+            <b>Все товары</b>
+        </a>
+    </hr>
+
+</div>
+
+</body>
+</html>

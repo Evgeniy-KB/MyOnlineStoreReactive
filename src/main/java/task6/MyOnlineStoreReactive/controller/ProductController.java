@@ -1,15 +1,18 @@
 package task6.MyOnlineStoreReactive.controller;
 
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import task6.MyOnlineStoreReactive.DTO.ProductDTO;
 import task6.MyOnlineStoreReactive.service.CartService;
 import task6.MyOnlineStoreReactive.service.ProductService;
 
 import java.io.IOException;
-import java.util.List;
 
 @Controller
 @RequestMapping("/products")
@@ -23,64 +26,62 @@ public class ProductController {
     }
 
     @GetMapping
-    public String products(Model model,
-                           @RequestParam(name = "sampleSearch", defaultValue = "", required = false) String sampleSearch,
-                           @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
-                           @RequestParam(name = "pageSize", defaultValue = "50") int pageSize,
-                           @RequestParam(name = "sorting", defaultValue = "", required = false) String sorting){
-
-        int productCount = productService.findCountByFilter(sampleSearch);
-        int allPages = (productCount / pageSize) + (productCount % pageSize > 0 ? 1 : 0);
-
-        List<ProductDTO> products = productService.findAllWithPaginationByFilter(sampleSearch, pageNumber, pageSize, sorting);
+    public Mono<String> products(Model model,
+                                 @RequestParam(name = "sampleSearch", defaultValue = "", required = false) String sampleSearch,
+                                 @RequestParam(name = "pageNumber", defaultValue = "1") Long pageNumber,
+                                 @RequestParam(name = "pageSize", defaultValue = "50") Long pageSize,
+                                 @RequestParam(name = "sorting", defaultValue = "", required = false) String sorting){
+        Flux<ProductDTO> products = productService.findAllWithPaginationByFilter(sampleSearch, pageNumber, pageSize, sorting);
 
         model.addAttribute("products", products);
         model.addAttribute("sampleSearch", sampleSearch);
         model.addAttribute("pageNumber", pageNumber);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("sorting", sorting);
-        model.addAttribute("allPages", allPages);
+        model.addAttribute("allPages", productService.findCountByFilter(sampleSearch)
+                .flatMap(countProducts -> Mono.just((countProducts / pageSize) + (countProducts % pageSize > 0 ? 1 : 0)))/*.map(z -> z)*/);
 
-        return "products";
+        return Mono.just("products");
     }
 
     @GetMapping("/{id}")
-    public String getProduct(@PathVariable(value = "id") Long id,
-                             @RequestParam(name = "quantity", defaultValue = "1", required = false) int quantity,
-                             Model model) {
-        ProductDTO productDTO = productService.getById(id);
-
-        model.addAttribute("product", productDTO);
-        model.addAttribute("quantity", quantity);
-
-        return "product";
+    public Mono<String> getProduct(Model model,
+                                   @PathVariable(value = "id") Long id,
+                                   @RequestParam(name = "quantity", defaultValue = "1", required = false) Long quantity) {
+        return productService.getById(id)
+                .doOnNext(x -> model.addAttribute("product", x))
+                .doOnNext(x -> model.addAttribute("quantity", quantity))
+                .then(Mono.just("product"));
     }
 
     @PostMapping("/{id}/add-to-cart")
-    public String addToCart(@PathVariable("id") Long id,
-                            @RequestParam(name = "quantity", defaultValue = "1") int quantity){
-        cartService.addProductQuantity(id, quantity);
-        return "redirect:/products";
+    public Mono<String> addToCart(@PathVariable("id") Long id, @ModelAttribute ProductDTO productDTO){
+        return cartService.addProductQuantity(id, productDTO.getQuantity())
+                .then(Mono.just("redirect:/products"));
     }
 
     @GetMapping("/add")
-    public String add(Model model) {
-        ProductDTO productDTO = new ProductDTO();
-        model.addAttribute("product", productDTO);
-
-        return "add-product";
+    public Mono<String> add(Model model) {
+        model.addAttribute("product", new ProductDTO());
+        return Mono.just("add-product");
     }
 
-    @PostMapping(path = "/save")
-    public String save(@ModelAttribute ProductDTO productDTO,
-                       @RequestPart(value = "pictureFile", required = false) MultipartFile file) throws IOException {
-        if (file != null) {
-            System.out.println(file);
-            productDTO.setPicture(file.getBytes());
+    @PostMapping(path = "/save", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public Mono<String> save(@ModelAttribute ProductDTO productDTO,
+                             @RequestPart(value = "pictureFile", required = false) FilePart filePart) throws IOException {
+        if (filePart != null) {
+            return DataBufferUtils.join(filePart.content())
+                    .map(dataBuffer -> dataBuffer.asByteBuffer().array())
+                    .map(bytes -> {
+                        productDTO.setPicture(bytes);
+                        return productDTO;
+                    })
+                    .flatMap(productService::save)
+                    .then(Mono.just("redirect:/products"));
         }
-        productService.save(productDTO);
 
-        return "redirect:/products"; // Возвращаем страницу, чтобы она перезагрузилась
+        return productService.save(productDTO)
+                .then(Mono.just("redirect:/products"));
     }
 
 }

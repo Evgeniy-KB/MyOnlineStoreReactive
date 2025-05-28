@@ -37,7 +37,7 @@
             <p>
                 <label for="pageSize" style="display:inline;">Товаров на странице: </label>
                 <select name="pageSize" th:value="${pageSize}" id="pageSize" onchange="this.form.submit()">
-                    <option th:each="s : ${ {100, 50, 20, 10} }" th:value="${s}" th:text="${s}" th:selected="${s==pageSize}"></option>
+                    <option th:each="s : ${ {100, 50, 20, 10, 5} }" th:value="${s}" th:text="${s}" th:selected="${s==pageSize}"></option>
                 </select>
             </p>
         </form>

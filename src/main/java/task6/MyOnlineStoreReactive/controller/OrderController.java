@@ -1,8 +1,12 @@
 package task6.MyOnlineStoreReactive.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import task6.MyOnlineStoreReactive.DTO.OrderDTO;
 import task6.MyOnlineStoreReactive.DTOTranslator.OrderDTOTranslator;
 import task6.MyOnlineStoreReactive.service.OrderService;
@@ -12,33 +16,26 @@ import java.util.List;
 @Controller
 @RequestMapping("/orders")
 public class OrderController {
+    @Autowired
     private final OrderService orderService;
 
-    public OrderController(OrderService orderService, OrderDTOTranslator orderDTOTranslator){
+    public OrderController(OrderService orderService){
         this.orderService = orderService;
     }
 
     @GetMapping
-    public String getOrders(Model model){
-        List<OrderDTO> orders = orderService.findAll();
-        model.addAttribute("orders", orders);
-
-        int totalPriceOfOrders = orders.stream().mapToInt(OrderDTO::getTotalPrice).sum();
-        model.addAttribute("totalPriceOfOrders", totalPriceOfOrders);
-
-        return "orders";
+    public Mono<String> getOrders(Model model){
+        Flux<OrderDTO> orders = orderService.findAll();
+        model.addAttribute("orders", (orders));
+        model.addAttribute("totalPriceOfOrders",  orders.map(OrderDTO::getTotalPrice).reduce(0L, Long::sum));
+        return Mono.just("orders");
     }
 
     @GetMapping("/{id}")
-    public String getOrder(Model model, @PathVariable("id") Long id){
-        OrderDTO orderDTO = orderService.getById(id);
-
-        model.addAttribute("products", orderDTO.getProducts());
-        model.addAttribute("totalPriceOfOrder", orderDTO.getTotalPrice());
-
-        return "order";
+    public Mono<String> getOrder(Model model, @PathVariable("id") Long id){
+        return orderService.getById(id)
+                .doOnNext(x -> model.addAttribute("products", x.getProducts()))
+                .doOnNext(x -> model.addAttribute("totalPriceOfOrder", x.getTotalPrice()))
+                .then(Mono.just("order"));
     }
-
-
-
 }

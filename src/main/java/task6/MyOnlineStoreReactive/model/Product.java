@@ -1,32 +1,32 @@
 package task6.MyOnlineStoreReactive.model;
 
-import jakarta.persistence.*;
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.List;
 import java.util.ArrayList;
 
-@Entity
 @Table(name = "products")
 public class Product {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title")
+    @Column("title")
     private String title;
 
-    @Lob
-    @Column(name = "picture", columnDefinition="BLOB")
+    @Column("picture")
     private byte[] picture;
 
-    @Column(name = "description")
+    @Column("description")
     private String description;
 
-    @Column(name = "price")
+    @Column("price")
     private int price;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @Transient
     private List<ProductOrder> productOrders = new ArrayList<>();
 
     public Product(){}

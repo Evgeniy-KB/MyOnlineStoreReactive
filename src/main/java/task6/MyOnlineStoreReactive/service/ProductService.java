@@ -1,19 +1,18 @@
 package task6.MyOnlineStoreReactive.service;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import task6.MyOnlineStoreReactive.DTO.ProductDTO;
-
-import java.util.List;
 
 public interface ProductService {
 
-    ProductDTO getById(Long id);
+    Mono<ProductDTO> getById(Long id);
 
-    void save(ProductDTO productDTO);
+    Mono<Long> save(ProductDTO productDTO);
 
-    int findCountByFilter(String sampleSearch);
+    Mono<Long> findCountByFilter(String sampleSearch);
 
-    List<ProductDTO> findAllWithPaginationByFilter(String sampleSearch, int pageNumber, int pageSize, String sorting);
-
+    Flux<ProductDTO> findAllWithPaginationByFilter(String sampleSearch, Long pageNumber, Long pageSize, String sorting);
 }
 
 

@@ -1,30 +1,58 @@
 package task6.MyOnlineStoreReactive.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
 @Table(name = "product_order")
 public class ProductOrder {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    public Long getId(){
+        return this.id;
+    }
+
+    @Transient
     private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @Transient
     private Order order;
 
-    @Column(name = "quantity")
-    private int quantity;
+    @Column("order_id")
+    private Long orderId;
+
+    public Long getOrderId(){
+        return this.orderId;
+    }
+
+    @Column("product_id")
+    private Long productId;
+
+    public Long getProductId(){
+        return this.productId;
+    }
+
+    @Column("quantity")
+    private Long quantity;
 
     public ProductOrder(){}
 
-    public ProductOrder(Order order, Product product, int quantity){
+    /*public ProductOrder(Order order, Product product, Long quantity){
         this.order = order;
         this.product = product;
+        this.quantity = quantity;
+    }
+
+    public ProductOrder(Product product, Long quantity){
+        this.product = product;
+        this.quantity = quantity;
+    }*/
+
+    public ProductOrder(Long orderId, Long productId, Long quantity){
+        this.orderId = orderId;
+        this.productId = productId;
         this.quantity = quantity;
     }
 
@@ -40,11 +68,11 @@ public class ProductOrder {
         return this.order;
     }
 
-    public void setQuantity(int quantity){
+    public void setQuantity(Long quantity){
         this.quantity = quantity;
     }
 
-    public int getQuantity(){
+    public Long getQuantity(){
         return this.quantity;
     }
 

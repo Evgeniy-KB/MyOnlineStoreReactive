@@ -22,7 +22,7 @@ public class OrderDTO {
         return this.products;
     }
 
-    public int getTotalPrice(){
-        return products.stream().mapToInt(x -> x.getQuantity() * x.getPrice()).sum();
+    public Long getTotalPrice(){
+        return products.stream().mapToLong(x -> x.getQuantity() * x.getPrice()).sum();
     }
 }

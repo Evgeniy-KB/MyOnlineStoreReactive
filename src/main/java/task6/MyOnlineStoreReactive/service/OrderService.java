@@ -1,11 +1,11 @@
 package task6.MyOnlineStoreReactive.service;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import task6.MyOnlineStoreReactive.DTO.OrderDTO;
 
-import java.util.List;
-
 public interface OrderService {
-    OrderDTO getById(Long orderId);
+    Mono<OrderDTO> getById(Long orderId);
 
-    List<OrderDTO> findAll();
+    Flux<OrderDTO> findAll();
 }

@@ -1,4 +1,4 @@
-# Веб-приложение «Витрина интернет-магазина» с использованием Spring Boot (MyOnlineStoreReactive)
+# Веб-приложение «Витрина интернет-магазина» с использованием Spring Boot на реактивном стеке технологий (MyOnlineStoreReactive)
 
 ## Содержание
 - Описание приложения
@@ -15,8 +15,8 @@
 - Java 21
 - Maven
 - Spring Boot Framework
-- Spring Data JPA
-- Hibernate ORM
+- Spring Data R2DBC
+- Spring WebFlux
 - Thymeleaf
 - H2
 - Docker

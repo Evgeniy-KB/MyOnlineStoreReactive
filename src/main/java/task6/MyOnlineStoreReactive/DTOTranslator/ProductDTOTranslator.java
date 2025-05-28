@@ -5,9 +5,17 @@ import task6.MyOnlineStoreReactive.DTO.ProductDTO;
 import task6.MyOnlineStoreReactive.model.CartProduct;
 import task6.MyOnlineStoreReactive.model.Product;
 import task6.MyOnlineStoreReactive.model.ProductOrder;
+import task6.MyOnlineStoreReactive.repository.ProductRepository;
 
 @Service
 public class ProductDTOTranslator {
+
+    ProductRepository productRepository;
+
+    public ProductDTOTranslator(ProductRepository productRepository){
+        this.productRepository = productRepository;
+    }
+
     public ProductDTO ToProductDTO(CartProduct cartProduct){
         Product product = cartProduct.getProduct();
         return new ProductDTO(product.getId(),
@@ -44,7 +52,7 @@ public class ProductDTOTranslator {
                 product.getTitle(),
                 product.getPicture(),
                 product.getDescription(),
-                0,
+                0L,
                 product.getPrice());
     }
 

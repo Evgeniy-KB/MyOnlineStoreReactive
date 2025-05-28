@@ -3,17 +3,11 @@ package task6.MyOnlineStoreReactive.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 import task6.MyOnlineStoreReactive.DTO.CartDTO;
 import task6.MyOnlineStoreReactive.DTOTranslator.CartDTOTranslator;
-import task6.MyOnlineStoreReactive.model.Cart;
-import task6.MyOnlineStoreReactive.model.CartProduct;
-import task6.MyOnlineStoreReactive.model.Order;
-import task6.MyOnlineStoreReactive.model.Product;
-import task6.MyOnlineStoreReactive.repository.CartRepository;
-import task6.MyOnlineStoreReactive.repository.OrderRepository;
-import task6.MyOnlineStoreReactive.repository.ProductRepository;
-
-import java.util.Optional;
+import task6.MyOnlineStoreReactive.model.*;
+import task6.MyOnlineStoreReactive.repository.*;
 
 @Service
 public class CartServiceImpl implements CartService{
@@ -24,78 +18,90 @@ public class CartServiceImpl implements CartService{
     @Autowired
     private final CartRepository cartRepository;
     @Autowired
+    private final CartProductRepository cartProductRepository;
+    @Autowired
+    private final ProductOrderRepository productOrderRepository;
+    @Autowired
     private final CartDTOTranslator cartDTOTranslator;
 
     @Autowired
-    public CartServiceImpl(ProductRepository productRepository, OrderRepository orderRepository, CartRepository cartRepository, CartDTOTranslator cartDTOTranslator){
+    public CartServiceImpl(ProductRepository productRepository, OrderRepository orderRepository,
+                           CartRepository cartRepository, CartProductRepository cartProductRepository, ProductOrderRepository productOrderRepository,
+                           CartDTOTranslator cartDTOTranslator){
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
+        this.cartProductRepository = cartProductRepository;
+        this.productOrderRepository = productOrderRepository;
         this.cartDTOTranslator = cartDTOTranslator;
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Optional<CartDTO> findCurrentCart(){
-        Optional<Cart> cart = cartRepository.findCurrentCart();
-
-        return Optional.of(cart.isEmpty() ? new CartDTO() : cartDTOTranslator.ToCartDTO(cart.get()));
+    @Transactional
+    public Mono<CartDTO> findCurrentCart() {
+        return cartRepository.findCurrentCart().switchIfEmpty(cartRepository.save(new Cart()))
+                .flatMap(cart -> cartRepository.findCartProductsByCartId(cart.getId())
+                        .flatMap(cartProduct -> productRepository.findById(cartProduct.getProductId())
+                                .map(product -> {
+                                    cartProduct.setProduct(product);
+                                    return cartProduct;
+                                }))
+                        .collectList()
+                        .map(cart::cartWithProducts))
+                .map(cartDTOTranslator::ToCartDTO);
     }
 
     @Override
     @Transactional
-    public void addProductQuantity(Long productId, int quantity){
-        Optional<Cart> existCart = cartRepository.findCurrentCart();
-
-        Cart cart;
-        if (existCart.isPresent())
-            cart = existCart.get();
-        else
-            cart = new Cart();
-
-        Product product = productRepository.getById(productId);
-        cart.addProductQuantity(product, quantity);
-
-        cartRepository.save(cart);
+    public Mono<Long> addProductQuantity(Long productId, Long quantity){
+        return cartRepository.findCurrentCart().switchIfEmpty(cartRepository.save(new Cart()))
+                .flatMap(cart ->
+                        Mono.zip(Mono.just(cart), cartProductRepository.findCountProductsInCart(cart.getId(), productId))
+                                .flatMap(tuple -> tuple.getT2() == 0//такого товара нет в корзине
+                                        ? cartProductRepository.save(new CartProduct(cart.getId(), productId, quantity))
+                                        .map(cartProduct -> cart.getId())
+                                        : cartProductRepository.updateCountProductsInCart(cart.getId(), productId, quantity)
+                                        .map(x -> cart.getId())
+                                ));
     }
 
     @Override
     @Transactional
-    public void deleteCart(Long cartId){
+    public Mono<Void> deleteCart(Long cartId){
         //Очищаем корзину
-        cartRepository.deleteById(cartId);
+        return cartRepository.deleteById(cartId);
     }
 
     @Override
     @Transactional
-    public Long buyOrder(Long cartId){
-        Cart cart = cartRepository.getById(cartId);
-
-        Order order = new Order();
-        //формируем заказ из корзину
-        for(CartProduct cartProduct : cart.getCartProducts()){
-            order.addProductQuantity(cartProduct.getProduct(), cartProduct.getQuantity());
-        }
-
-        return orderRepository.save(order).getId();
+    public Mono<Long> buyOrder(Long cartId){
+        return orderRepository.save(new Order())
+                .flatMap(order -> cartRepository.findById(cartId)
+                        .flatMap(cart -> cartRepository.findCartProductsByCartId(cartId)
+                                .flatMap(cartProduct -> /*{*/
+                                    /*return*/ productOrderRepository.save(new ProductOrder(order.getId(), cartProduct.getProductId(), cartProduct.getQuantity()))
+                                    /*}*/)
+                                .collectList())
+                        .map(order::orderWithProducts))
+                .map(Order::getId);
     }
 
     @Override
     @Transactional
-    public void deleteProductFromCart(Long cartId, Long productId){
-        cartRepository.deleteByCartIdAndProductId(cartId, productId);
+    public Mono<Void> deleteProductFromCart(Long cartId, Long productId){
+        return cartRepository.deleteByCartIdAndProductId(cartId, productId);
     }
 
     @Override
     @Transactional
-    public void decrementProductInCart(Long cartId, Long productId){
-        cartRepository.updateQuantityProductInCart(cartId, productId, -1L);
+    public Mono<Void> decrementProductInCart(Long cartId, Long productId){
+        return cartRepository.updateQuantityProductInCart(cartId, productId, -1L);
     }
 
     @Override
     @Transactional
-    public void incrementProductInCart(Long cartId, Long productId){
-        cartRepository.updateQuantityProductInCart(cartId, productId, +1L);
+    public Mono<Void> incrementProductInCart(Long cartId, Long productId){
+        return cartRepository.updateQuantityProductInCart(cartId, productId, +1L);
     }
 
 }

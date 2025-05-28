@@ -1,22 +1,21 @@
 package task6.MyOnlineStoreReactive.service;
 
+import reactor.core.publisher.Mono;
 import task6.MyOnlineStoreReactive.DTO.CartDTO;
-
-import java.util.Optional;
 
 public interface CartService {
 
-    Optional<CartDTO> findCurrentCart();
+    Mono<CartDTO> findCurrentCart();
 
-    void addProductQuantity(Long productId, int quantity);
+    Mono<Long> addProductQuantity(Long productId, Long quantity);
 
-    void deleteCart(Long cartId);
+    Mono<Void> deleteCart(Long cartId);
 
-    Long buyOrder(Long cartId);
+    Mono<Long> buyOrder(Long cartId);
 
-    void deleteProductFromCart(Long cartId, Long productId);
+    Mono<Void> deleteProductFromCart(Long cartId, Long productId);
 
-    void decrementProductInCart(Long cartId, Long productId);
+    Mono<Void> decrementProductInCart(Long cartId, Long productId);
 
-    void incrementProductInCart(Long cartId, Long productId);
+    Mono<Void> incrementProductInCart(Long cartId, Long productId);
 }

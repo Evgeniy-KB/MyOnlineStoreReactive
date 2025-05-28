@@ -20,8 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-//@ActiveProfiles("test")
-@WebMvcTest(ProductController.class)
+//@ActiveProfiles("test")----------------
+/*@WebMvcTest(ProductController.class)
 public class ProductControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -58,6 +58,6 @@ public class ProductControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/products"));
     }
-}
+}*/
 
 

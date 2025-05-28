@@ -40,15 +40,19 @@ create table carts(
     id bigserial primary key
 );
 
+
 -- Таблица связей корзины и товара
 create table cart_product(
     id bigserial primary key,
     cart_id bigserial not null,
     product_id bigserial not null,
     quantity numeric default 0,
-    foreign key (cart_id) references carts(id),
+    foreign key (cart_id) references carts(id)
+    on update cascade on delete cascade,
     foreign key (product_id) references products(id)
+    on update cascade on delete cascade
 );
+
 
 
 

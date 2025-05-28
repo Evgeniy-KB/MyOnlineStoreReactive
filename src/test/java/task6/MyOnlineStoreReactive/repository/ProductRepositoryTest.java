@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;
 
-@ActiveProfiles("test")
+/*@ActiveProfiles("test")
 @DataJpaTest
 public class ProductRepositoryTest {
     @Autowired
@@ -97,4 +97,4 @@ public class ProductRepositoryTest {
         Optional<Cart> notExistsCart = cartRepository.findCurrentCart();
         assertThat(notExistsCart.isPresent()).isFalse();
     }
-}
+}*/

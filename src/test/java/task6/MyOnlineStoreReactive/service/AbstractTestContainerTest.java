@@ -9,7 +9,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest // интеграционный тест с поднятием контекста
 @Testcontainers // обозначаем необходимость инициализации тест-контейнеров
-//@ActiveProfiles("test")
+@ActiveProfiles("test")
 public abstract class AbstractTestContainerTest {
     @Container // декларируем объект учитываемым тест-контейнером
     @ServiceConnection // автоматически назначаем параметры соединения с контейнером

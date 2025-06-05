@@ -43,7 +43,6 @@ public class Product {
         return Base64.encodeBase64String(this.getPicture());
     }
 
-
     public Long getId(){
         return this.id;
     }

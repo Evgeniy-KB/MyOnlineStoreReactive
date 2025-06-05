@@ -39,17 +39,6 @@ public class ProductOrder {
 
     public ProductOrder(){}
 
-    /*public ProductOrder(Order order, Product product, Long quantity){
-        this.order = order;
-        this.product = product;
-        this.quantity = quantity;
-    }
-
-    public ProductOrder(Product product, Long quantity){
-        this.product = product;
-        this.quantity = quantity;
-    }*/
-
     public ProductOrder(Long orderId, Long productId, Long quantity){
         this.orderId = orderId;
         this.productId = productId;
@@ -75,6 +64,4 @@ public class ProductOrder {
     public Long getQuantity(){
         return this.quantity;
     }
-
-
 }

@@ -78,9 +78,7 @@ public class CartServiceImpl implements CartService{
         return orderRepository.save(new Order())
                 .flatMap(order -> cartRepository.findById(cartId)
                         .flatMap(cart -> cartRepository.findCartProductsByCartId(cartId)
-                                .flatMap(cartProduct -> /*{*/
-                                    /*return*/ productOrderRepository.save(new ProductOrder(order.getId(), cartProduct.getProductId(), cartProduct.getQuantity()))
-                                    /*}*/)
+                                .flatMap(cartProduct -> productOrderRepository.save(new ProductOrder(order.getId(), cartProduct.getProductId(), cartProduct.getQuantity())))
                                 .collectList())
                         .map(order::orderWithProducts))
                 .map(Order::getId);

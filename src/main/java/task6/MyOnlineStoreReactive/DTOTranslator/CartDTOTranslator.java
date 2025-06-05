@@ -19,6 +19,6 @@ public class CartDTOTranslator {
     }
 
     public Cart ToCart(CartDTO cartDTO){
-        return new Cart(cartDTO.getId()/*, cart.getCartProducts().stream().map(productDTOTranslator::ToProductDTO).toList()*/);
+        return new Cart(cartDTO.getId());
     }
 }

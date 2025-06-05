@@ -31,9 +31,9 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     @Transactional
-    public Mono<Long> save(ProductDTO productDTO) {
+    public Mono<ProductDTO> save(ProductDTO productDTO) {
         Product product = productDTOTranslator.ToProduct(productDTO);
-        return productRepository.save(product).map(Product::getId);
+        return productRepository.save(product).map(productDTOTranslator::ToProductDTO);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ProductServiceImpl implements ProductService{
         Flux<Product> products = productRepository.findAllByFilter(sampleSearch);
 
         Comparator<Product> titleComparator = (product1,product2) -> product1.getTitle().compareTo(product2.getTitle());
-        Comparator<Product> priceComparator = (product1,product2) -> product1.getPrice() - product2.getPrice();
+        Comparator<Product> priceComparator = (product1,product2) -> Long.compare(product1.getPrice(), product2.getPrice());
 
         if (sorting.equals("title"))
             products = products.sort(titleComparator);

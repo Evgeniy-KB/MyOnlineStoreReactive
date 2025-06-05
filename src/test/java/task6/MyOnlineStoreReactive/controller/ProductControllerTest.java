@@ -1,63 +1,91 @@
 package task6.MyOnlineStoreReactive.controller;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import task6.MyOnlineStoreReactive.DTO.ProductDTO;
-import task6.MyOnlineStoreReactive.service.CartService;
-import task6.MyOnlineStoreReactive.service.ProductService;
+import task6.MyOnlineStoreReactive.service.CartServiceImpl;
+import task6.MyOnlineStoreReactive.service.ProductServiceImpl;
 
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-//@ActiveProfiles("test")----------------
-/*@WebMvcTest(ProductController.class)
+@WebFluxTest(ProductController.class)
 public class ProductControllerTest {
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
+
     @MockitoBean
-    private ProductService productService;
+    private ProductServiceImpl productServiceImpl;
     @MockitoBean
-    private CartService cartService;
+    private CartServiceImpl cartServiceImpl;
 
     @Test
-    @DirtiesContext
-    public void getProductsAndShouldReturnHtml() throws Exception{
-        ProductDTO testProduct1 = new ProductDTO(1L, "Товар 1", null, "Описание товара 1",125);
-        ProductDTO testProduct2 = new ProductDTO(2L, "Товар 2", null, "Описание товара 2",37);
+    public void testGetProductsAndShouldReturnHtml() throws Exception{
+        ProductDTO testProduct1 = new ProductDTO(1L, "Товар 1", null, "Описание товара 1",125L);
+        ProductDTO testProduct2 = new ProductDTO(2L, "Товар 2", null, "Описание товара 2",37L);
 
-        when(productService.findAllWithPaginationByFilter("", 1, 50, "")).thenReturn(List.of(testProduct1, testProduct2));
+        Flux<ProductDTO> productDTOFlux = Flux.just(testProduct1, testProduct2);
 
-        mockMvc.perform(get("/products"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("text/html;charset=UTF-8"))
-                .andExpect(view().name("products"))
-                .andExpect(model().attributeExists("products"))
-                .andExpect(xpath("//table/tbody/tr").nodeCount(2))
-                .andExpect(xpath("//table/tbody/tr[1]/td[3]").string("Описание товара 1"));
+        Mockito.when(productServiceImpl.findAllWithPaginationByFilter("", 1L, 50L, "")).thenReturn(productDTOFlux);
+        Mockito.when(productServiceImpl.findCountByFilter("")).thenReturn(Mono.just(2L));
+
+        webTestClient.get()
+                .uri("/products")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_HTML)
+                .expectBody()
+                .xpath("//table/tbody/tr").nodeCount(2)
+                .xpath("//table/tbody/tr[1]/td[3]").isEqualTo("Описание товара 1")
+                .xpath("//table/tbody/tr[2]/td[4]").isEqualTo("37");
     }
 
     @Test
-    @DirtiesContext
     public void addNewProductToDatabaseAndRedirect() throws Exception{
-        mockMvc.perform(post("/products/save")
-                        .param("title", "Товар 7")
-                        .param("picture", "")
-                        .param("description", "Описание товара7")
-                        .param("price", "77"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/products"));
+        ProductDTO newProductDTO = new ProductDTO(null, "Товар 7", null, "Описание товара 7",77L);
+        ProductDTO savedProductDTO = new ProductDTO(1L, "Товар 7", null, "Описание товара 7",77L);
+
+        Mockito.when(productServiceImpl.save(Mockito.any(ProductDTO.class)))
+                .thenReturn(Mono.just(savedProductDTO));
+
+        webTestClient.post()
+                .uri("/products/save")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(newProductDTO), ProductDTO.class)
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().valueEquals("Location", "/products");
+
+        Mockito.verify(productServiceImpl, Mockito.times(1))
+                .save(Mockito.any(ProductDTO.class));
     }
-}*/
+
+    @Test
+    public void testGetProductAndShouldReturnHtml() throws Exception {
+        ProductDTO testProduct1 = new ProductDTO(1L, "Товар 1", null, "Описание товара 1", 125L);
+
+        Mockito.when(productServiceImpl.getById(1L)).thenReturn(Mono.just(testProduct1));
+
+        webTestClient.get()
+                .uri("/products/{id}", 1L)
+                .exchange()
+                .expectStatus().is2xxSuccessful()
+                .expectHeader().contentType(MediaType.TEXT_HTML)
+                .expectBody(String.class).consumeWith(response -> {
+                    var body = response.getResponseBody();
+                    assertNotNull(body);
+                    assertTrue(body.contains(testProduct1.getTitle()));
+                    assertTrue(body.contains(testProduct1.getDescription()));
+                    assertTrue(body.contains(""+testProduct1.getPrice()));
+                });
+    }
+}
 
 

@@ -8,7 +8,7 @@ public interface ProductService {
 
     Mono<ProductDTO> getById(Long id);
 
-    Mono<Long> save(ProductDTO productDTO);
+    Mono<ProductDTO> save(ProductDTO productDTO);
 
     Mono<Long> findCountByFilter(String sampleSearch);
 

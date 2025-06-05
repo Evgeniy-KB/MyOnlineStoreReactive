@@ -24,14 +24,14 @@ public class Product {
     private String description;
 
     @Column("price")
-    private int price;
+    private Long price;
 
     @Transient
     private List<ProductOrder> productOrders = new ArrayList<>();
 
     public Product(){}
 
-    public Product(Long id, String title, byte[] picture, String description, int price){
+    public Product(Long id, String title, byte[] picture, String description, Long price){
         this.id = id;
         this.title = title;
         this.picture = picture;
@@ -76,11 +76,11 @@ public class Product {
         this.description = description;
     }
 
-    public int getPrice(){
+    public Long getPrice(){
         return this.price;
     }
 
-    public void setPrice(int price){ this.price = price; }
+    public void setPrice(Long price){ this.price = price; }
 
 
 

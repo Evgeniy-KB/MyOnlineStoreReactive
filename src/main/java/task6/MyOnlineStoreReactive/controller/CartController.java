@@ -7,13 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
 import reactor.core.publisher.Mono;
-import task6.MyOnlineStoreReactive.DTO.CartDTO;
-import task6.MyOnlineStoreReactive.repository.OrderRepository;
-import task6.MyOnlineStoreReactive.service.CartService;
 
-import java.util.Optional;
+import task6.MyOnlineStoreReactive.service.CartService;
 
 @Controller
 @RequestMapping("/cart")

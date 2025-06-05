@@ -8,16 +8,16 @@ public class ProductDTO {
     private byte[] picture;
     private String description;
     private Long quantity = 0L;
-    private int price;
+    private Long price;
 
     public ProductDTO(){}
 
-    public ProductDTO(Long id, String title, byte[] picture, String description, Long quantity, int price){
+    public ProductDTO(Long id, String title, byte[] picture, String description, Long quantity, Long price){
         this(id, title, picture, description, price);
         this.quantity = quantity;
     }
 
-    public ProductDTO(Long id, String title, byte[] picture, String description, int price){
+    public ProductDTO(Long id, String title, byte[] picture, String description, Long price){
         this.id = id;
         this.title = title;
         this.picture = picture;
@@ -69,11 +69,11 @@ public class ProductDTO {
         return this.quantity;
     }
 
-    public int getPrice(){
+    public Long getPrice(){
         return this.price;
     }
 
-    public void setPrice(int price){ this.price = price; }
+    public void setPrice(Long price){ this.price = price; }
 
     public Long getTotalPrice(){
         return this.quantity * this.price;

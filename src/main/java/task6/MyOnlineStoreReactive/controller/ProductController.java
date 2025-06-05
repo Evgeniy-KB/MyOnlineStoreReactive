@@ -1,7 +1,6 @@
 package task6.MyOnlineStoreReactive.controller;
 
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,13 +32,15 @@ public class ProductController {
                                  @RequestParam(name = "sorting", defaultValue = "", required = false) String sorting){
         Flux<ProductDTO> products = productService.findAllWithPaginationByFilter(sampleSearch, pageNumber, pageSize, sorting);
 
+        Mono<Long> allPages = productService.findCountByFilter(sampleSearch)
+                .flatMap(countProducts -> Mono.just((countProducts / pageSize) + (countProducts % pageSize > 0 ? 1 : 0)));
+
         model.addAttribute("products", products);
         model.addAttribute("sampleSearch", sampleSearch);
         model.addAttribute("pageNumber", pageNumber);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("sorting", sorting);
-        model.addAttribute("allPages", productService.findCountByFilter(sampleSearch)
-                .flatMap(countProducts -> Mono.just((countProducts / pageSize) + (countProducts % pageSize > 0 ? 1 : 0)))/*.map(z -> z)*/);
+        model.addAttribute("allPages", allPages);
 
         return Mono.just("products");
     }
@@ -66,7 +67,7 @@ public class ProductController {
         return Mono.just("add-product");
     }
 
-    @PostMapping(path = "/save", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PostMapping(path = "/save")
     public Mono<String> save(@ModelAttribute ProductDTO productDTO,
                              @RequestPart(value = "pictureFile", required = false) FilePart filePart) throws IOException {
         if (filePart != null) {

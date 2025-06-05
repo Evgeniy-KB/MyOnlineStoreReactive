@@ -13,8 +13,8 @@ import task6.MyOnlineStoreReactive.model.ProductOrder;
 
 @Repository
 public interface ProductRepository extends R2dbcRepository<Product, Long> {
-    @Query("SELECT COUNT(1) FROM products p WHERE LOWER(p.title) LIKE CONCAT('%',LOWER(?1),'%') or LOWER(p.description) LIKE CONCAT('%',LOWER(?1),'%')")
-    Mono<Long> findCountByFilter(String sampleSearch);
+    @Query("SELECT COUNT(1) FROM products p WHERE LOWER(p.title) LIKE CONCAT('%',LOWER(:sampleSearch),'%') or LOWER(p.description) LIKE CONCAT('%',LOWER(:sampleSearch),'%')")
+    Mono<Long> findCountByFilter(@Param("sampleSearch") String sampleSearch);
 
     @Query("SELECT p.* FROM products p WHERE LOWER(p.title) LIKE CONCAT('%',LOWER(:sampleSearch),'%') or LOWER(p.description) LIKE CONCAT('%',LOWER(:sampleSearch),'%')")
     Flux<Product> findAllWithPaginationByFilter(@Param("sampleSearch") String sampleSearch, Pageable pageable);

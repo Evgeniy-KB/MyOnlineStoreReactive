@@ -1,20 +1,15 @@
 spring:
-  r2dbc:
-    url: r2dbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-    initialization-mode: embedded
-    hikari:
-      maximum-pool-size: 10
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: none
-    defer-datasource-initialization: true
+  #r2dbc:
+  #  url: r2dbc:h2:mem:///~/db/testdb;MODE=MYSQL;DB_CLOSE_DELAY=-1 #MODE=MYSQL # URL подключения к БД
+  #  username: sa
+  #  password:
   sql:
     init:
-      mode: always
-
+      mode: EMBEDDED
+  logging:
+    level:
+      org.springframework.r2dbc.core.DefaultDatabaseClient: DEBUG # заодно включим логирование SQL-запросов
+      io.asyncer.r2dbc.mysql: DEBUG # в этот раз будем логировать запросы напрямую из r2dbc-драйвера
+      #io.r2dbc: DEBUG # и добавим больше деталей (не включать в настоящем приложении)
 
 

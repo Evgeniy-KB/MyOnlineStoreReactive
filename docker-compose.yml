@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - 6379:6379
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+  restful-payment:
+    container_name: restful-payment
+    build:
+      dockerfile: ./restful-payment/Dockerfile
+    restart: always
+    ports:
+      - 8081:8081
+
+  web-app:
+    container_name: web-app
+    build:
+      dockerfile: ./web-app/Dockerfile
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - redis
+      - restful-payment
+
+

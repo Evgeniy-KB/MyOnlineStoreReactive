@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: API платежей
+  version: 1.0.0
+  description: API платежей для витрины интернет-магазина
+servers:
+  - url: http://localhost:8081
+    description: локальный сервер платежей
+paths:
+  /api/balance:
+    get:
+      summary: Получение баланса
+      operationId: getBalance
+      tags:
+        - balance
+      responses:
+        '200':
+          description: Баланс
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+  /api/pay:
+    patch:
+      summary: Оплата заказа
+      operationId: payOrder
+      tags:
+        - pay
+      parameters:
+        - name: price
+          in: query
+          description: цена покупки
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Заказ оформлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayResponse"
+        '400':
+          description: Недостаточно средств для покупки
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayResponse"
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayResponse"
+components:
+  schemas:
+    BalanceResponse:
+      type: object
+      properties:
+        balance:
+          type: integer
+          format: int64
+    PayResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        success:
+          type: boolean
+
+
+
+
+
+

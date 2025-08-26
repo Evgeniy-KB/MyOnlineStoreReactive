@@ -1,0 +1,24 @@
+spring:
+  #r2dbc:
+  #  url: r2dbc:h2:mem:///~/db/testdb;MODE=MYSQL;DB_CLOSE_DELAY=-1 #MODE=MYSQL # URL подключения к БД
+  #  username: sa
+  #  password:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      repositories:
+        enabled: false
+  cache:
+    redis:
+      time-to-live-seconds: 60 # время жизни кэша в секундах (например, 1 минута)
+  sql:
+    init:
+      mode: EMBEDDED
+  logging:
+    level:
+      org.springframework.r2dbc.core.DefaultDatabaseClient: DEBUG # заодно включим логирование SQL-запросов
+      io.asyncer.r2dbc.mysql: DEBUG # в этот раз будем логировать запросы напрямую из r2dbc-драйвера
+      #io.r2dbc: DEBUG # и добавим больше деталей (не включать в настоящем приложении)
+
+

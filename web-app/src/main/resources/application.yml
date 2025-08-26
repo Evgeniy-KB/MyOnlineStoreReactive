@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /web-app
+spring:
+  application:
+    name: web-app
+  r2dbc:
+    url: r2dbc:h2:mem:///~/db/testdb;DB_CLOSE_DELAY=-1 #MODE=MYSQL # URL подключения к БД
+    username: sa
+    password:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      repositories:
+        enabled: false
+  cache:
+    redis:
+      time-to-live-seconds: 60 # время жизни кэша в секундах (например, 1 минута)
+  h2:
+    console:
+      enabled: false
+#logging:
+ # level:
+  #  io:
+   #   r2dbc:
+    #    h2: TRACE
+     #   QUERY: DEBUG # for queries
+      #  PARAM: DEBUG # for parameters
+
+payment-service:
+  base-path: http://localhost:8081
